@@ -35,7 +35,7 @@ app.post("/create-user", async (req, res) => {
 // Read User
 app.get("/User/:id", async (req, res) => {
   try {
-    let {id} = req.params
+    let { id } = req.params;
 
     // find() se saara data array ke roop mein mil jayega
     // let allUsers = await userModel.find();
@@ -54,7 +54,7 @@ app.get("/User/:id", async (req, res) => {
 });
 
 // Update User
-app.put("update-user", async (req, res) => {
+app.put("/user/update/:id", async (req, res) => {
   try {
     let { name, email, mobile, password } = req.body;
 
@@ -64,13 +64,63 @@ app.put("update-user", async (req, res) => {
       });
     }
 
-  }
-   catch (error) {
+    let { id } = req.params;
+    console.log(id);
+
+    let updatedUser = await userModel.findByIdAndUpdate(
+      id,
+      {
+        name,
+        email,
+        mobile,
+        password,
+      },
+      {
+        new: true,
+      },
+    );
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    console.log(updatedUser);
+
+    return res.status(200).json({
+      message: "updated user successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
     console.log(error);
     return res.status(500).json({
       message: "Internal Server Problem",
     });
   }
 });
+
+// Delete User
+app.delete('/user/delete/:id', async (req,res)=>{
+
+    try {
+        let {id} = req.params
+     let deletedUser =   await userModel.findByIdAndDelete(id)
+       return res.status(200).json({
+        message:"user deleted successfully"
+       })
+
+       if(!deletedUser){
+        return res.status(404).json({
+            message:"user not found"
+        })
+       }
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message:'Internal server Error'
+        })       
+    }
+})
 
 module.exports = app;
